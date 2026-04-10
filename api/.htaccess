@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# API routing
+RewriteRule ^api/(.*)$ api/public/index.php [QSA,L]
+
+# Non toccare file e cartelle reali
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Router generale
+RewriteRule ^ public/index.php [QSA,L]
+
+</IfModule>
