@@ -51,60 +51,6 @@
 
     // -- INIZIO GESTIONE ENDPOINT PER VERIFICA CREDENZIALI -- //
 
-    if ($segments[0] == "credentials") {
-        
-    }
-
-    // -- FINE GESTIONE ENDPOINT PER VERIFICA CREDENZIALI -- //
-
-    // -- INIZIO GESTIONE ENDPOINT PER CREAZIONE E VERIFICA TOKEN JWT -- //
-
-    if ($segments[0] == 'token') {
-        if ($segments[1] == 'refresh') {
-            $username = $data["username"] ?? null;
-            $id = $data["id"] ?? null;
-            try {
-                $tokenService = new TokenService();
-                $refreshToken = $tokenService->generateRefreshToken($username, $id);
-                http_response_code(200);
-                echo json_encode(["refreshToken" => $refreshToken]);
-            } catch (Exception $e) {
-                http_response_code(500);
-                echo json_encode(['error' => 'Internal error: ' . $e->getMessage()]);
-                exit;
-            }
-        }
-        //verify-access per accedere alle risorse dell'applicazione
-        else if ($segments[1] == 'verify-access') {
-            try {
-                $tokenService = new TokenService();
-                $tokenService->validateAccessToken($authHeader[1]);
-                http_response_code(200);
-                echo json_encode(["message" => "Access token is valid."]);
-            }
-            catch (Exception $e) {
-                http_response_code(401);
-                echo json_encode(["error" => "Auth error", "message" => $e->getMessage()]);
-                exit;
-            }
-        }
-        //verify-refresh per ottener nuovo access token
-        else if ($segments[1] == 'verify-refresh') {
-            try {
-                $tokenService = new TokenService();
-                $userdata = $tokenService->validateRefreshToken($authHeader[1]);
-                $accessToken = $tokenService->generateAccessToken($userdata->username, $userdata->id);
-                http_response_code(200);
-                echo json_encode(["accessToken" => $accessToken]);
-            }
-            catch (Exception $e) {
-                http_response_code(401);
-                echo json_encode(["error" => "Auth error", "message" => $e->getMessage()]);
-                exit;
-            }
-        }
-    }
-
     function verifyUserPassword(string $storedPassword, string $plainPassword): bool {
         $parts = explode('.', $storedPassword, 2);
         if (count($parts) !== 2) {
@@ -117,8 +63,6 @@
 
         return hash_equals($hash, $candidateHash);
     }
-
-    // -- FINE GESTIONE ENDPOINT PER CREAZIONE E VERIFICA TOKEN JWT -- //
 
     if ($segments[0] == 'credentials') {
         if ($segments[1] == 'login') {
@@ -154,8 +98,8 @@
                 }
 
                 $tokenService = new TokenService();
-                $refreshToken = $tokenService->generateRefreshToken($userLoginData["username"], (int)$userLoginData["id"]);
-                $accessToken = $tokenService->generateAccessToken($userLoginData["username"], (int)$userLoginData["id"]);
+                $refreshToken = $tokenService->generateRefreshToken($userLoginData["username"], $userLoginData["id"]);
+                $accessToken = $tokenService->generateAccessToken($userLoginData["username"], $userLoginData["id"]);
 
                 setcookie("jwtAccess", $accessToken, [
                     "expires" => time() + 600,
@@ -189,6 +133,58 @@
         echo json_encode(["error" => "Not found", "message" => "Credentials endpoint not found."]);
         exit;
     }
+
+    // -- FINE GESTIONE ENDPOINT PER VERIFICA CREDENZIALI -- //
+
+    // -- INIZIO GESTIONE ENDPOINT PER CREAZIONE E VERIFICA TOKEN JWT -- //
+
+    if ($segments[0] == 'token') {
+        if ($segments[1] == 'refresh') {
+            $username = $data["username"] ?? null;
+            $id = $data["id"] ?? null;
+            try {
+                $tokenService = new TokenService();
+                $refreshToken = $tokenService->generateRefreshToken($username, $id);
+                http_response_code(200);
+                echo json_encode(["refreshToken" => $refreshToken]);
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Internal error: ' . $e->getMessage()]);
+                exit;
+            }
+        }
+        //verify-access per accedere alle risorse dell'applicazione
+        else if ($segments[1] == 'verify-access') {
+            try {
+                $tokenService = new TokenService();
+                $userdata = $tokenService->validateAccessToken($authHeader[1]);
+                http_response_code(200);
+                echo json_encode(["message" => "Access token is valid.", "userdata" => $userdata]);
+            }
+            catch (Exception $e) {
+                http_response_code(401);
+                echo json_encode(["error" => "Auth error", "message" => $e->getMessage()]);
+                exit;
+            }
+        }
+        //verify-refresh per ottener nuovo access token
+        else if ($segments[1] == 'verify-refresh') {
+            try {
+                $tokenService = new TokenService();
+                $userdata = $tokenService->validateRefreshToken($authHeader[1]);
+                $accessToken = $tokenService->generateAccessToken($userdata->username, $userdata->id);
+                http_response_code(200);
+                echo json_encode(["accessToken" => $accessToken, "userdata" => $userdata]);
+            }
+            catch (Exception $e) {
+                http_response_code(401);
+                echo json_encode(["error" => "Auth error", "message" => $e->getMessage()]);
+                exit;
+            }
+        }
+    }
+
+    // -- FINE GESTIONE ENDPOINT PER CREAZIONE E VERIFICA TOKEN JWT -- //
 
     // -- INIZIO GESTIONE ENDPOINT PER RICHIESTE DATABASE -- //
 

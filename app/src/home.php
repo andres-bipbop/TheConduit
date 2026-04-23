@@ -1,15 +1,12 @@
 <?php
-require "send_token_requests.php";
-require "send_queries.php";
 
 if (!isset($_COOKIE['jwtAccess']) || !isset($_COOKIE['jwtRefresh'])) {
-    //header("location: loginForm.html");
+    header("location: loginForm.html");
     exit;
-
-    var_dump($_COOKIE['jwtAccess']);
 }
 
-$tokenData = checkToken($_COOKIE['jwtAccess'], $_COOKIE['jwtRefresh']);
+
+
 $userId = $tokenData["data"]["userdata"]["id"];
 $userData = getUserMemberships($userId);
 

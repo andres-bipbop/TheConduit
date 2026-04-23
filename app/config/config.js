@@ -1,7 +1,8 @@
 const APP_CONFIG = (() => {
 	const APP_ORIGIN = window.location.origin;
-	const APP_BASE_PATH = "/progetto/app";
-	const API_BASE_PATH = "/progetto/api";
+	const WEBSITE_BASE_PATH = "/website";
+	const APP_BASE_PATH = `${WEBSITE_BASE_PATH}/progetto/app`;
+	const API_BASE_PATH = `${WEBSITE_BASE_PATH}/progetto/api`;
 
 	const APP_BASE_URL = `${APP_ORIGIN}${APP_BASE_PATH}`;
 	const API_BASE_URL = `${APP_ORIGIN}${API_BASE_PATH}`;
@@ -42,6 +43,7 @@ const APP_CONFIG = (() => {
 
 	return Object.freeze({
 		APP_ORIGIN,
+		WEBSITE_BASE_PATH,
 		APP_BASE_PATH,
 		APP_BASE_URL,
 		API_BASE_PATH,

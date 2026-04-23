@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Editorial Feed · The Social Journal</title>
+
+  <!-- Tailwind + Inter Font -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      background: #fafaf9;
+    }
+    .inter-normal { font-weight: 400; }
+    .inter-medium { font-weight: 500; }
+    .inter-bold { font-weight: 700; letter-spacing: -0.01em; }
+    :root {
+      --electric-blue: #0b06ff;
+    }
+    .hover-lift {
+      transition: all 0.2s ease;
+    }
+    .hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px -12px rgba(0, 0, 0, 0.1);
+    }
+    /* smooth sticky header */
+    .sticky-nav {
+      backdrop-filter: blur(0px);
+      background: white;
+    }
+  </style>
+</head>
+<body class="bg-neutral-50 text-neutral-900">
+
+<!-- HEADER con doppio layout: logo + profilo personale dinamico in alto a sinistra (logo e profilo affiancati) -->
+<header class="border-b bg-white sticky top-0 z-20 shadow-sm">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+    <!-- BLOCCO SINISTRA: logo + profilo personale insieme (come richiesto "in alto a sinistra") -->
+    <div class="flex items-center gap-4 flex-wrap">
+      <!-- Logo / brand -->
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--electric-blue);">
+          <span class="text-white text-lg font-black">📖</span>
+        </div>
+        <h1 class="text-xl md:text-2xl inter-bold tracking-tight" style="color: var(--electric-blue);">
+          The Social Journal
+        </h1>
+      </div>
+      
+      <!-- BANNER PROFILO PERSONALE (dinamico, interattivo) - piccolo badge che mostra nome, avatar, badge di stato -->
+      <div class="relative group cursor-pointer transition-all duration-200 hover:scale-[1.01]">
+        <div class="flex items-center gap-2 bg-neutral-100/80 hover:bg-neutral-100 rounded-full pl-1 pr-4 py-1 border border-neutral-200/80 shadow-sm">
+          <!-- Avatar con stato online dinamico -->
+          <div class="relative">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+              AV
+            </div>
+            <span class="absolute bottom-0 right-0 block w-2.5 h-2.5 rounded-full bg-green-500 ring-1 ring-white"></span>
+          </div>
+          <div class="flex flex-col leading-tight">
+            <span class="text-sm font-semibold text-neutral-800">Alessia Vieri</span>
+            <span id="profileStatusText" class="text-[11px] text-neutral-500 flex items-center gap-1">✍️ editorialista · <span class="text-green-600 font-medium">attivo</span></span>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-neutral-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <!-- mini tooltip/dropdown dinamico finto interattivo (per renderlo più vivo) -->
+        <div class="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-100 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-30 pointer-events-none">
+          <div class="p-2 border-b border-neutral-100">
+            <p class="text-xs font-semibold text-neutral-800">@alessia_edit</p>
+            <p class="text-xs text-neutral-500">alessia@socialjournal.it</p>
+          </div>
+          <div class="p-2 text-xs text-neutral-600 flex items-center gap-2"><span>📊</span> 1,280 follower</div>
+          <div class="p-2 text-xs text-neutral-600 flex items-center gap-2"><span>✍️</span> 34 articoli pubblicati</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- badge editorial feed (destra) -->
+    <div class="flex items-center gap-3">
+      <span class="text-xs bg-neutral-100 text-neutral-600 px-3 py-1.5 rounded-full inter-medium hidden sm:inline-block">📰 curated feed</span>
+      <div class="w-9 h-9 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition cursor-pointer">
+        🔔
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN LAYOUT : tutto dinamico (spazi, feed, follower con interazioni live javascript) -->
+<main class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 px-6 py-8">
+
+  <!-- LEFT: SPACES (dinamici con conteggi aggiornati) -->
+  <aside class="md:col-span-3 space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xs uppercase tracking-widest inter-medium" style="color: var(--electric-blue);">
+        Spaces
+      </h2>
+      <span class="text-[11px] text-neutral-400 bg-white px-2 py-0.5 rounded-full border">+ esplora</span>
+    </div>
+
+    <div class="space-y-3" id="spacesContainer">
+      <!-- dati dinamici via JS -->
+    </div>
+
+    <!-- suggerimento in stile dinamico: crea spazio -->
+    <div class="mt-4 p-3 rounded-xl border border-dashed border-neutral-300 bg-white/40 text-center text-xs text-neutral-500 hover:bg-neutral-50 transition cursor-pointer">
+      + Crea nuovo spazio
+    </div>
+  </aside>
+
+  <!-- CENTER: FEED (post interattivi, like/comments/condivisioni dinamici) -->
+  <section class="md:col-span-6 space-y-6">
+    <div class="flex items-center justify-between">
+      <h2 class="text-xs uppercase tracking-widest inter-medium" style="color: var(--electric-blue);">
+        Editorial Feed
+      </h2>
+      <div class="flex gap-2 text-[11px] font-medium text-neutral-500 bg-white px-2 py-1 rounded-full border">
+        <span class="text-electric-blue">🔥 trending</span> · ultime ore
+      </div>
+    </div>
+
+    <div class="space-y-6" id="feedContainer">
+      <!-- Posts generati dinamicamente -->
+    </div>
+  </section>
+
+  <!-- RIGHT: FOLLOWERS (dinamici, possibilità di seguire) -->
+  <aside class="md:col-span-3 space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xs uppercase tracking-widest inter-medium" style="color: var(--electric-blue);">
+        Followers
+      </h2>
+      <span class="text-[11px] text-blue-600 font-medium cursor-pointer hover:underline" id="refreshFollowersLink">⟳ aggiorna</span>
+    </div>
+    
+    <div class="space-y-3" id="followersContainer">
+      <!-- follower dinamici -->
+    </div>
+    
+    <!-- mini footer -->
+    <div class="mt-5 text-xs text-neutral-400 text-center border-t pt-4">
+      <span>connessioni • in tempo reale</span>
+    </div>
+  </aside>
+</main>
+
+<!-- script per rendere TUTTO dinamico: post, followers, spaces e interazioni live (like, commenti incrementali) -->
+<script src="../config/config.js"></script>
+<script>
+  (function() {
+    const api = window.APP_CONFIG ? window.APP_CONFIG.ENDPOINTS : null;
+    const fallbackApiBase = window.location.origin + "/website/progetto/api";
+
+    const fallbackData = {
+      spaces: [
+        { id: 1, name: "Arte & Cultura", members: 12400, slug: "arte" },
+        { id: 2, name: "Tech & Coding", members: 48100, slug: "tech" },
+        { id: 3, name: "Letteratura", members: 9800, slug: "letteratura" }
+      ],
+      posts: [
+        {
+          id: "p1",
+          space: "Tech & Coding",
+          timeAgo: "2h fa",
+          title: "Il futuro del software non e il codice, ma il contesto",
+          excerpt: "Stiamo entrando in un'era in cui scrivere codice non sara piu il punto centrale.",
+          likes: 120,
+          comments: 34,
+          shares: 8,
+          likedByUser: false
+        }
+      ],
+      followers: [
+        { id: "f1", name: "maria_arte", avatarColor: "bg-amber-200", bio: "Segue Arte & Tech", following: false },
+        { id: "f2", name: "lucas.dev", avatarColor: "bg-sky-200", bio: "Segue Coding", following: false }
+      ]
+    };
+
+    let spacesData = [];
+    let posts = [];
+    let followersList = [];
+    let currentUserId = null;
+
+    function endpoint(pathFactory, fallbackPath) {
+      if (pathFactory) return pathFactory;
+      return fallbackPath;
+    }
+
+    function getAccessToken() {
+      return sessionStorage.getItem("jwtAccess") || localStorage.getItem("jwtAccess") || "";
+    }
+
+    function getRefreshToken() {
+      return sessionStorage.getItem("jwtRefresh") || localStorage.getItem("jwtRefresh") || "";
+    }
+
+    function setAccessToken(token) {
+      if (!token) return;
+      sessionStorage.setItem("jwtAccess", token);
+    }
+
+    function decodeJwtPayload(token) {
+      try {
+        const parts = token.split(".");
+        if (parts.length !== 3) return null;
+        const json = atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"));
+        return JSON.parse(json);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function inferUserId() {
+      const payload = decodeJwtPayload(getAccessToken());
+      return payload && payload.userdata ? Number(payload.userdata.id) : null;
+    }
+
+    async function refreshAccessToken() {
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) throw new Error("Refresh token mancante");
+
+      const refreshUrl = api ? api.token.verifyRefresh : fallbackApiBase + "/token/verify-refresh";
+      const response = await fetch(refreshUrl, {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + refreshToken
+        },
+        credentials: "include"
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.accessToken) {
+        throw new Error(data.message || "Impossibile rinnovare il token");
+      }
+
+      setAccessToken(data.accessToken);
+      return data.accessToken;
+    }
+
+    async function fetchWithAuth(url, options, alreadyRetried) {
+      const accessToken = getAccessToken();
+      const requestOptions = Object.assign(
+        {
+          method: "GET",
+          headers: {},
+          credentials: "include"
+        },
+        options || {}
+      );
+
+      if (!requestOptions.headers) requestOptions.headers = {};
+      if (accessToken) {
+        requestOptions.headers.Authorization = "Bearer " + accessToken;
+      }
+
+      const response = await fetch(url, requestOptions);
+      if (response.status !== 401 || alreadyRetried) {
+        return response;
+      }
+
+      await refreshAccessToken();
+      return fetchWithAuth(url, options, true);
+    }
+
+    async function fetchJsonAuth(url) {
+      const response = await fetchWithAuth(url);
+      const data = await response.json().catch(() => []);
+      if (!response.ok) {
+        const message = data && data.message ? data.message : "Errore chiamata endpoint";
+        throw new Error(message);
+      }
+      return data;
+    }
+
+    function formatNumber(num) {
+      const value = Number(num || 0);
+      if (value >= 1000) return (value / 1000).toFixed(1) + "k";
+      return value.toString();
+    }
+
+    function formatTimeAgo(dateInput) {
+      if (!dateInput) return "ora";
+      const date = new Date(dateInput);
+      if (Number.isNaN(date.getTime())) return "ora";
+      const diffMs = Date.now() - date.getTime();
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHours < 1) return "meno di 1h fa";
+      if (diffHours < 24) return diffHours + "h fa";
+      const diffDays = Math.floor(diffHours / 24);
+      return diffDays + "g fa";
+    }
+
+    function sanitizeText(value, fallback) {
+      const text = String(value || "").trim();
+      return text || fallback;
+    }
+
+    function pickAvatarColor(index) {
+      const palette = ["bg-amber-200", "bg-sky-200", "bg-rose-200", "bg-emerald-100", "bg-violet-200"];
+      return palette[index % palette.length];
+    }
+
+    function mapSpace(raw, membersCount) {
+      const id = Number(raw.id || raw.space_id || 0);
+      const name = sanitizeText(raw.name || raw.space_name, "Spazio senza nome");
+      const members = Number(
+        membersCount || raw.members || raw.members_count || raw.maxMembers || raw.max_members || 0
+      );
+      return {
+        id,
+        name,
+        members,
+        slug: name.toLowerCase().replace(/\s+/g, "-")
+      };
+    }
+
+    function mapPost(raw) {
+      const id = String(raw.id || raw.post_id || "post_" + Date.now() + Math.random());
+      const title = sanitizeText(raw.title || raw.post_title, "Post senza titolo");
+      const excerpt = sanitizeText(raw.excerpt || raw.body || raw.content || raw.text, "Nessun contenuto disponibile.");
+      return {
+        id,
+        space: sanitizeText(raw.space_name || raw.space || "Generale", "Generale"),
+        timeAgo: formatTimeAgo(raw.postedAt || raw.posted_at || raw.created_at),
+        title,
+        excerpt,
+        likes: Number(raw.likes || raw.like_count || 0),
+        comments: Number(raw.comments || raw.comment_count || 0),
+        shares: Number(raw.shares || raw.share_count || 0),
+        likedByUser: false
+      };
+    }
+
+    function mapFollower(raw, index) {
+      const name = sanitizeText(raw.username || raw.name, "utente");
+      return {
+        id: String(raw.user_id || raw.id || "f_" + index),
+        name,
+        avatarColor: pickAvatarColor(index),
+        bio: "Segue i tuoi contenuti",
+        following: false
+      };
+    }
+
+    async function loadSpaces(userId) {
+      const spacesUrl = endpoint(
+        api && api.users ? api.users.getUserSpaces(userId) : null,
+        fallbackApiBase + "/users/getUserSpaces/" + userId
+      );
+      const rawSpaces = await fetchJsonAuth(spacesUrl);
+
+      const spaces = await Promise.all(
+        (rawSpaces || []).map(async function(space) {
+          const spaceId = Number(space.id || space.space_id || 0);
+          if (!spaceId) return mapSpace(space, 0);
+
+          const membersUrl = endpoint(
+            api && api.spaces ? api.spaces.getMembers(spaceId) : null,
+            fallbackApiBase + "/spaces/getMembers/" + spaceId
+          );
+          try {
+            const members = await fetchJsonAuth(membersUrl);
+            return mapSpace(space, Array.isArray(members) ? members.length : 0);
+          } catch (_) {
+            return mapSpace(space, 0);
+          }
+        })
+      );
+
+      return spaces;
+    }
+
+    async function loadPosts(userId) {
+      const postsUrl = endpoint(
+        api && api.posts ? api.posts.getFollowedFeed(userId) : null,
+        fallbackApiBase + "/posts/getFollowedFeed/" + userId
+      );
+      const rawPosts = await fetchJsonAuth(postsUrl);
+      return (rawPosts || []).map(mapPost);
+    }
+
+    async function loadFollowers(userId) {
+      const followersUrl = endpoint(
+        api && api.users ? api.users.getUserFollowers(userId) : null,
+        fallbackApiBase + "/users/getUserFollowers/" + userId
+      );
+      const rawFollowers = await fetchJsonAuth(followersUrl);
+      return (rawFollowers || []).map(mapFollower);
+    }
+
+    async function loadAllDataFromApi() {
+      currentUserId = inferUserId();
+      if (!currentUserId) {
+        throw new Error("Sessione non valida: manca user id nel token");
+      }
+
+      const [spaces, loadedPosts, followers] = await Promise.all([
+        loadSpaces(currentUserId),
+        loadPosts(currentUserId),
+        loadFollowers(currentUserId)
+      ]);
+
+      spacesData = spaces;
+      posts = loadedPosts;
+      followersList = followers;
+    }
+
+    function showTransientMessage(message, className) {
+      const container = document.getElementById("followersContainer");
+      if (!container) return;
+      const tempMsg = document.createElement("div");
+      tempMsg.className = className;
+      tempMsg.innerText = message;
+      container.prepend(tempMsg);
+      setTimeout(function() {
+        tempMsg.remove();
+      }, 1800);
+    }
+
+    function renderSpaces() {
+      const container = document.getElementById("spacesContainer");
+      if (!container) return;
+
+      if (!spacesData.length) {
+        container.innerHTML = '<div class="p-4 bg-white border rounded-xl text-sm text-neutral-500">Nessuno spazio disponibile.</div>';
+        return;
+      }
+
+      container.innerHTML = spacesData
+        .map(function(space) {
+          return `
+        <div class="space-card p-4 bg-white border rounded-xl hover:shadow-md transition-all duration-200 cursor-pointer group" data-space-id="${space.id}">
+          <div class="flex justify-between items-start">
+            <p class="inter-medium text-neutral-800 group-hover:text-[#0b06ff] transition">${escapeHtml(space.name)}</p>
+            <span class="text-[10px] font-medium bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-full">${formatNumber(space.members)}</span>
+          </div>
+          <p class="text-sm text-neutral-500 mt-1">${formatNumber(space.members)} membri</p>
+          <div class="mt-2 text-[11px] text-neutral-400 flex items-center gap-1">🔗 entra nello spazio →</div>
+        </div>
+      `;
+        })
+        .join("");
+    }
+
+    function renderFeed() {
+      const container = document.getElementById("feedContainer");
+      if (!container) return;
+
+      if (!posts.length) {
+        container.innerHTML = '<article class="bg-white border rounded-2xl p-6 text-neutral-500">Nessun post nel feed.</article>';
+        return;
+      }
+
+      container.innerHTML = posts
+        .map(function(post) {
+          return `
+        <article class="bg-white border rounded-2xl p-6 space-y-4 hover:shadow-md transition-all duration-200" data-post-id="${post.id}">
+          <div class="flex justify-between items-start">
+            <div class="text-xs inter-medium px-2 py-0.5 rounded-full bg-neutral-100 inline-block" style="color: var(--electric-blue);">
+              in ${escapeHtml(post.space)} • ${escapeHtml(post.timeAgo)}
+            </div>
+            <button class="text-neutral-400 hover:text-neutral-600 transition">⋯</button>
+          </div>
+          <h3 class="text-2xl inter-bold leading-tight tracking-tight text-neutral-800">${escapeHtml(post.title)}</h3>
+          <p class="text-neutral-700 leading-relaxed">${escapeHtml(post.excerpt)}</p>
+          <div class="flex gap-6 text-sm text-neutral-500 inter-medium pt-2 border-t border-neutral-100 mt-2">
+            <button class="like-btn flex items-center gap-1 hover:text-red-500 transition ${post.likedByUser ? "text-red-500" : ""}" data-id="${post.id}">
+              <span class="text-lg">${post.likedByUser ? "❤️" : "🤍"}</span>
+              <span class="like-count">${post.likes}</span>
+            </button>
+            <button class="comment-btn flex items-center gap-1 hover:text-blue-600 transition" data-id="${post.id}">
+              💬 <span class="comment-count">${post.comments}</span>
+            </button>
+            <button class="share-btn flex items-center gap-1 hover:text-green-600 transition" data-id="${post.id}">
+              ↗ <span class="share-count">${post.shares}</span>
+            </button>
+          </div>
+        </article>
+      `;
+        })
+        .join("");
+
+      document.querySelectorAll(".like-btn").forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+          e.preventDefault();
+          const postId = btn.getAttribute("data-id");
+          const post = posts.find(function(p) {
+            return p.id === postId;
+          });
+          if (!post) return;
+          post.likedByUser = !post.likedByUser;
+          post.likes += post.likedByUser ? 1 : -1;
+          if (post.likes < 0) post.likes = 0;
+          renderFeed();
+        });
+      });
+
+      document.querySelectorAll(".comment-btn").forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+          e.preventDefault();
+          const postId = btn.getAttribute("data-id");
+          const post = posts.find(function(p) {
+            return p.id === postId;
+          });
+          if (!post) return;
+          post.comments += 1;
+          renderFeed();
+        });
+      });
+
+      document.querySelectorAll(".share-btn").forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+          e.preventDefault();
+          const postId = btn.getAttribute("data-id");
+          const post = posts.find(function(p) {
+            return p.id === postId;
+          });
+          if (!post) return;
+          post.shares += 1;
+          renderFeed();
+        });
+      });
+    }
+
+    function renderFollowers() {
+      const container = document.getElementById("followersContainer");
+      if (!container) return;
+
+      if (!followersList.length) {
+        container.innerHTML = '<div class="p-3 bg-white border rounded-xl text-xs text-neutral-500">Nessun follower trovato.</div>';
+        return;
+      }
+
+      container.innerHTML = followersList
+        .map(function(follower) {
+          return `
+        <div class="flex items-center justify-between gap-2 p-3 bg-white border rounded-xl hover:shadow-sm transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full ${follower.avatarColor} flex items-center justify-center text-neutral-700 font-bold shadow-sm">
+              ${escapeHtml(follower.name.charAt(0).toUpperCase())}
+            </div>
+            <div>
+              <p class="inter-medium text-sm flex items-center gap-1">${escapeHtml(follower.name)}
+                ${follower.following ? '<span class="text-[9px] bg-blue-50 text-blue-600 px-1.5 rounded-full">segue</span>' : ""}
+              </p>
+              <p class="text-xs text-neutral-500">${escapeHtml(follower.bio)}</p>
+            </div>
+          </div>
+          <button class="follow-toggle text-xs font-medium px-3 py-1.5 rounded-full transition-all ${
+            follower.following
+              ? "bg-neutral-200 text-neutral-700 hover:bg-red-100"
+              : "bg-[#0b06ff] text-white hover:bg-indigo-700"
+          }" data-id="${follower.id}">
+            ${follower.following ? "Seguito" : "Segui"}
+          </button>
+        </div>
+      `;
+        })
+        .join("");
+
+      document.querySelectorAll(".follow-toggle").forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-id");
+          const follower = followersList.find(function(f) {
+            return f.id === id;
+          });
+          if (!follower) return;
+          follower.following = !follower.following;
+          renderFollowers();
+          updateProfileDynamicBadge();
+        });
+      });
+    }
+
+    function updateProfileDynamicBadge() {
+      const totalFollowed = followersList.filter(function(f) {
+        return f.following;
+      }).length;
+      const profileDesc = document.getElementById("profileStatusText");
+      if (!profileDesc) return;
+
+      let counter = profileDesc.querySelector(".follow-counter-dynamic");
+      if (!counter) {
+        counter = document.createElement("span");
+        counter.className = "follow-counter-dynamic ml-1 text-green-600 text-[10px] font-medium";
+        profileDesc.appendChild(counter);
+      }
+      counter.innerText = " • " + totalFollowed + " seguiti";
+    }
+
+    async function reloadFollowersFromApi() {
+      if (!currentUserId) return;
+      followersList = await loadFollowers(currentUserId);
+      renderFollowers();
+      updateProfileDynamicBadge();
+    }
+
+    function setupExtraInteractivity() {
+      const refreshBtn = document.getElementById("refreshFollowersLink");
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", async function(e) {
+          e.preventDefault();
+          try {
+            await reloadFollowersFromApi();
+            showTransientMessage("Followers aggiornati", "text-center text-green-600 text-xs p-1 animate-pulse");
+          } catch (_) {
+            showTransientMessage("Aggiornamento non riuscito", "text-center text-red-600 text-xs p-1");
+          }
+        });
+      }
+
+      document.addEventListener("click", function(e) {
+        const spaceCard = e.target.closest(".space-card");
+        if (!spaceCard) return;
+        const spaceNameNode = spaceCard.querySelector(".inter-medium");
+        const spaceName = spaceNameNode ? spaceNameNode.innerText : "";
+        if (!spaceName) return;
+
+        const toast = document.createElement("div");
+        toast.className =
+          "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-neutral-800 text-white text-sm px-5 py-2 rounded-full shadow-lg z-50 animate-bounce";
+        toast.innerText = '🔍 Esplora spazio "' + spaceName + '" — contenuti in arrivo';
+        document.body.appendChild(toast);
+        setTimeout(function() {
+          toast.remove();
+        }, 2000);
+      });
+    }
+
+    function setupHeaderNotify() {
+      const bell = document.querySelector(".w-9.h-9.rounded-full");
+      if (!bell) return;
+      bell.addEventListener("click", function() {
+        const notifDiv = document.createElement("div");
+        notifDiv.className =
+          "fixed top-20 right-6 bg-white border-l-4 border-[#0b06ff] shadow-xl rounded-xl p-3 max-w-sm z-50 text-sm animate-fade-in";
+        notifDiv.innerHTML =
+          '<div class="flex gap-2"><span>🔔</span><div><p class="font-medium">Notifica live</p><p class="text-xs text-neutral-500">Nuovo articolo nel feed che ti potrebbe interessare.</p></div></div>';
+        document.body.appendChild(notifDiv);
+        setTimeout(function() {
+          notifDiv.remove();
+        }, 3000);
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str
+        .replace(/[&<>]/g, function(m) {
+          if (m === "&") return "&amp;";
+          if (m === "<") return "&lt;";
+          if (m === ">") return "&gt;";
+          return m;
+        })
+        .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+          return c;
+        });
+    }
+
+    async function initData() {
+      try {
+        await loadAllDataFromApi();
+      } catch (_) {
+        spacesData = fallbackData.spaces.slice();
+        posts = fallbackData.posts.slice();
+        followersList = fallbackData.followers.slice();
+      }
+    }
+
+    async function init() {
+      await initData();
+      renderSpaces();
+      renderFeed();
+      renderFollowers();
+      updateProfileDynamicBadge();
+      setupExtraInteractivity();
+      setupHeaderNotify();
+
+      const profileBanner = document.querySelector(".group");
+      if (!profileBanner) return;
+      profileBanner.addEventListener("click", function() {
+        const totalPosts = posts.length;
+        const likedByUserCount = posts.filter(function(p) {
+          return p.likedByUser;
+        }).length;
+        alert(
+          "📌 Alessia Vieri\n✍️ Editor dal 2024 · " +
+            followersList.filter(function(f) {
+              return f.following;
+            }).length +
+            " follower seguiti\n❤️ hai messo like a " +
+            likedByUserCount +
+            " post\n📖 " +
+            totalPosts +
+            " articoli nel feed"
+        );
+      });
+    }
+
+    init();
+  })();
+</script>
+
+<!-- aggiunta animazioni leggere via tailwind custom extra -->
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
+  .group:hover .group-hover\:visible {
+    visibility: visible;
+  }
+  .group .group-hover\:opacity-100 {
+    opacity: 1;
+  }
+  button, .cursor-pointer {
+    cursor: pointer;
+  }
+</style>
+
+</body>
+</html>
