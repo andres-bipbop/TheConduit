@@ -49,6 +49,14 @@
         }
     }
 
+    // -- INIZIO GESTIONE ENDPOINT PER VERIFICA CREDENZIALI -- //
+
+    if ($segments[0] == "credentials") {
+        
+    }
+
+    // -- FINE GESTIONE ENDPOINT PER VERIFICA CREDENZIALI -- //
+
     // -- INIZIO GESTIONE ENDPOINT PER CREAZIONE E VERIFICA TOKEN JWT -- //
 
     if ($segments[0] == 'token') {
@@ -97,8 +105,90 @@
         }
     }
 
+    function verifyUserPassword(string $storedPassword, string $plainPassword): bool {
+        $parts = explode('.', $storedPassword, 2);
+        if (count($parts) !== 2) {
+            return false;
+        }
+
+        $salt = $parts[0];
+        $hash = $parts[1];
+        $candidateHash = hash("sha256", $salt . $plainPassword . LOGIN_SECRET_PEPPER);
+
+        return hash_equals($hash, $candidateHash);
+    }
+
     // -- FINE GESTIONE ENDPOINT PER CREAZIONE E VERIFICA TOKEN JWT -- //
 
+    if ($segments[0] == 'credentials') {
+        if ($segments[1] == 'login') {
+            $username = $data["username"] ?? null;
+            $password = $data["password"] ?? null;
+
+            if (!$username || !$password) {
+                http_response_code(400);
+                echo json_encode(["error" => "Bad request", "message" => "Username and password are required."]);
+                exit;
+            }
+
+            try {
+                $usersEndpoints = new UsersEndpoints();
+                $userLoginData = $usersEndpoints->getUserLoginData($username);
+
+                if (!$userLoginData) {
+                    http_response_code(404);
+                    echo json_encode(["error" => "Not found", "message" => "User not found."]);
+                    exit;
+                }
+
+                if (($userLoginData["status"] ?? null) !== "active") {
+                    http_response_code(403);
+                    echo json_encode(["error" => "Forbidden", "message" => "Account not verified."]);
+                    exit;
+                }
+
+                if (!verifyUserPassword($userLoginData["password"], $password)) {
+                    http_response_code(401);
+                    echo json_encode(["error" => "Unauthorized", "message" => "Invalid credentials."]);
+                    exit;
+                }
+
+                $tokenService = new TokenService();
+                $refreshToken = $tokenService->generateRefreshToken($userLoginData["username"], (int)$userLoginData["id"]);
+                $accessToken = $tokenService->generateAccessToken($userLoginData["username"], (int)$userLoginData["id"]);
+
+                setcookie("jwtAccess", $accessToken, [
+                    "expires" => time() + 600,
+                    "path" => "/",
+                    "httponly" => true,
+                    "samesite" => "Lax"
+                ]);
+
+                setcookie("jwtRefresh", $refreshToken, [
+                    "expires" => time() + 604800,
+                    "path" => "/",
+                    "httponly" => true,
+                    "samesite" => "Lax"
+                ]);
+
+                http_response_code(200);
+                echo json_encode([
+                    "message" => "Login successful.",
+                    "accessToken" => $accessToken,
+                    "refreshToken" => $refreshToken
+                ]);
+            }
+            catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(["error" => "Internal error", "message" => $e->getMessage()]);
+            }
+            exit;
+        }
+
+        http_response_code(404);
+        echo json_encode(["error" => "Not found", "message" => "Credentials endpoint not found."]);
+        exit;
+    }
 
     // -- INIZIO GESTIONE ENDPOINT PER RICHIESTE DATABASE -- //
 

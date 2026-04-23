@@ -3,7 +3,7 @@ require "send_token_requests.php";
 require "send_queries.php";
 
 if (!isset($_COOKIE['jwtAccess']) || !isset($_COOKIE['jwtRefresh'])) {
-    header("location: loginForm.php");
+    //header("location: loginForm.html");
     exit;
 
     var_dump($_COOKIE['jwtAccess']);

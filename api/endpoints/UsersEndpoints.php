@@ -11,11 +11,19 @@
         }
 
         public function getUserLoginData($username) {
-            $stmt = $this->pdo->prepare("SELECT * FROM app_users WHERE username = ?");
+            $stmt = $this->pdo->prepare("SELECT id, username, password, status FROM app_users WHERE username = ?");
             $stmt->bindValue(1, $username, PDO::PARAM_STR);
             $stmt->execute();
             $user = $stmt->fetch();
             return $user;
+        }
+
+        public function getUserData($user_id) {
+            $stmt = $this->pdo->prepare("SELECT * FROM app_users WHERE id = ?");
+            $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+            $user_data = $stmt->fetch();
+            return $user_data;
         }
 
         public function getUserSpaces($user_id) {

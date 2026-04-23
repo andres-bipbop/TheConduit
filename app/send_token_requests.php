@@ -80,7 +80,7 @@
         if ($data["http_code"] != "200") {
             $data = json_decode(getAccessToken($jwtRefresh), true);
             if ($data["http_code"] != "200") {
-                header("location: loginForm.php");
+                header("location: loginForm.html");
                 exit;
             } else {
                 return checkToken($data["accessToken"], $jwtRefresh);
