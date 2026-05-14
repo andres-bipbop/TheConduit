@@ -1,7 +1,8 @@
 const APP_CONFIG = (() => {
 	const APP_ORIGIN = window.location.origin;
 	const WEBSITE_BASE_PATH = "/website";
-	const APP_BASE_PATH = `${WEBSITE_BASE_PATH}/progetto/app`;
+	const PROGETTO = `${WEBSITE_BASE_PATH}/progetto/`;
+	const APP_BASE_PATH = `${WEBSITE_BASE_PATH}/progetto/app/src`;
 	const API_BASE_PATH = `${WEBSITE_BASE_PATH}/progetto/api`;
 
 	const APP_BASE_URL = `${APP_ORIGIN}${APP_BASE_PATH}`;
@@ -18,6 +19,7 @@ const APP_CONFIG = (() => {
 		},
 		users: {
 			getUserLoginData: (username) => `${API_BASE_URL}/users/getUserLoginData/${encodeURIComponent(username)}`,
+			getUserData: (id) => `${API_BASE_URL}/users/getUserData/${id}`,
 			getUserSpaces: (id) => `${API_BASE_URL}/users/getUserSpaces/${id}`,
 			getUserInterests: (id) => `${API_BASE_URL}/users/getUserInterests/${id}`,
 			getUserFollowers: (id) => `${API_BASE_URL}/users/getUserFollowers/${id}`
@@ -29,7 +31,8 @@ const APP_CONFIG = (() => {
 			getCustomPosts: (id) => `${API_BASE_URL}/posts/getCustomPosts/${id}`,
 			getFollowedFeed: (id) => `${API_BASE_URL}/posts/getFollowedFeed/${id}`,
 			getPostsByUser: (id) => `${API_BASE_URL}/posts/getPostsByUser/${id}`,
-			getPostsBySpace: (id) => `${API_BASE_URL}/posts/getPostsBySpace/${id}`
+			getPostsBySpace: (id) => `${API_BASE_URL}/posts/getPostsBySpace/${id}`,
+			createPost: `${API_BASE_URL}/posts/createPost`
 		},
 		spaces: {
 			createSpace: `${API_BASE_URL}/spaces/createSpace`,
@@ -37,13 +40,14 @@ const APP_CONFIG = (() => {
 		},
 		comments: {
 			getCommentsByPost: (id) => `${API_BASE_URL}/comments/getCommentsByPost/${id}`,
-			createComment: `${API_BASE_URL}/comments/createComment`
+			getCommentReplies: (id) => `${API_BASE_URL}/comments/getCommentReplies/${id}`
 		}
 	};
 
 	return Object.freeze({
 		APP_ORIGIN,
 		WEBSITE_BASE_PATH,
+		PROGETTO,
 		APP_BASE_PATH,
 		APP_BASE_URL,
 		API_BASE_PATH,

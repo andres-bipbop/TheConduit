@@ -11,7 +11,7 @@
         }
 
         public function getUserLoginData($username) {
-            $stmt = $this->pdo->prepare("SELECT id, username, password, status FROM app_users WHERE username = ?");
+            $stmt = $this->pdo->prepare("SELECT id, username, email, password, status FROM app_users WHERE username = ?");
             $stmt->bindValue(1, $username, PDO::PARAM_STR);
             $stmt->execute();
             $user = $stmt->fetch();
@@ -27,7 +27,7 @@
         }
 
         public function getUserSpaces($user_id) {
-            $stmt = $this->pdo->prepare("SELECT s.* FROM getMembersBySpace gm LEFT JOIN app_spaces s ON gm.space_id = s.id WHERE gm.user_id = ?");
+            $stmt = $this->pdo->prepare("SELECT s.*, COUNT(gm.user_id) as member_count FROM getMembersBySpace gm LEFT JOIN app_spaces s ON gm.space_id = s.id WHERE gm.user_id = ? GROUP BY s.id");
             $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
             $stmt->execute();
             $spaces = $stmt->fetchAll();
@@ -43,7 +43,7 @@
         }
 
         public function getUserFollowers($user_id) {
-            $stmt = $this->pdo->prepare("SELECT f.followed_id AS user_id, u.username FROM app_followers f JOIN app_users u ON f.followed_id = u.id WHERE f.follower_id = ?");
+            $stmt = $this->pdo->prepare("SELECT f.followed_id AS user_id, u.username, u.name FROM app_followers f JOIN app_users u ON f.followed_id = u.id WHERE f.follower_id = ?");
             $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
             $stmt->execute();
             $data = $stmt->fetchAll();

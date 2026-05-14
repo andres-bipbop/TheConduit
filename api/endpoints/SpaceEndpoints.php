@@ -10,13 +10,12 @@
             $this->pdo = Database::getConnection();
         }
 
-        public function createSpace($name, $iconUrl, $bannerUrl, $description, $maxMembers) {
-            $stmt = $this->pdo->prepare("INSERT INTO app_spaces (name, iconUrl, bannerUrl, description, maxMembers) VALUES (?, ?, ?, ?, ?)");
+        public function createSpace($name, $iconUrl, $bannerUrl, $description) {
+            $stmt = $this->pdo->prepare("INSERT INTO app_spaces (name, iconUrl, bannerUrl, description) VALUES (?, ?, ?, ?)");
             $stmt->bindValue(1, $name, PDO::PARAM_STR);
             $stmt->bindValue(2, $iconUrl, PDO::PARAM_STR);
             $stmt->bindValue(3, $bannerUrl, PDO::PARAM_STR);
             $stmt->bindValue(4, $description, PDO::PARAM_STR);
-            $stmt->bindValue(5, $maxMembers, PDO::PARAM_INT);
             $stmt->execute();
             return $this->pdo->lastInsertId();
         }

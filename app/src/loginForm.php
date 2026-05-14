@@ -1,9 +1,19 @@
+<?php
+
+if (isset($_COOKIE['jwtRefresh'])) {
+    header("location: home.php");
+    exit;
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="../../../output.css" rel="stylesheet">
+    <script src="../config/config.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <title>Login Form</title>
@@ -81,8 +91,6 @@
     }
 </style>
 
-<script src="../config/config.js"></script>
-
 <script>
     (function () {
         const form = document.getElementById("registrationForm");
@@ -90,11 +98,6 @@
         const passwordInput = document.getElementById("password");
         const submitButton = document.getElementById("send-form-button");
         const errorBox = document.getElementById("login-error");
-
-        if (document.cookie.includes("jwtAccess=") || document.cookie.includes("jwtRefresh=")) {
-            window.location.href = "home.html";
-            return;
-        }
 
         function showError(message) {
             errorBox.textContent = message;
@@ -107,14 +110,13 @@
         }
 
         async function login(username, password) {
-            const loginUrl = window.APP_CONFIG.ENDPOINTS.credentials.login;
+            const loginUrl = APP_CONFIG.ENDPOINTS.credentials.login;
 
             const response = await fetch(loginUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                credentials: "include",
                 body: JSON.stringify({ username, password })
             });
 
@@ -142,8 +144,11 @@
             submitButton.disabled = true;
 
             try {
-                await login(username, password);
-                window.location.href = "home.html";
+                const data = await login(username, password);
+                sessionStorage.setItem("id", data.userdata.id);
+                sessionStorage.setItem("username", data.userdata.username);
+                sessionStorage.setItem("email", data.userdata.email);
+                window.location.href = "home.php";
             } catch (error) {
                 showError(error.message || "Errore durante il login.");
             } finally {

@@ -5,9 +5,10 @@
     require __DIR__ . "/../endpoints/PostEndpoints.php";
     require __DIR__ . "/../endpoints/SpaceEndpoints.php";
     require __DIR__ . "/../endpoints/CommentEndpoints.php";
-
+    
     header("Content-Type: application/json");
-    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Origin: https://bookish-rotary-phone-6976vjxwgp5rfqwv-80.app.github.dev");
+    header("Access-Control-Allow-Credentials: true");
     header("Access-Control-Allow-Methods: GET, POST");
     header("Access-Control-Allow-Headers: Content-Type");
 
@@ -36,17 +37,37 @@
     }
 
     function authorizeRequest($headers, $authHeader) {
-        if (!isset($headers['Authorization']) || $headers['Authorization'] == null) {
-            http_response_code(401);
-            echo json_encode(["error" => "Auth error", "message" => "Missing authorization header."]);
-            exit;
-        }
+        if (!isset($_COOKIE['jwtAccess'])){
+            if (!isset($headers['Authorization']) || $headers['Authorization'] == null) {
+                http_response_code(401);
+                echo json_encode(["error" => "Auth error", "message" => "Missing authorization header."]);
+                exit;
+            }
 
-        if ($authHeader[0] !== 'Bearer') {
-            http_response_code(401);
-            echo json_encode(["error" => "Auth error", "message" => "Invalid token type."]);
-            exit;
+            if ($authHeader[0] !== 'Bearer') {
+                http_response_code(401);
+                echo json_encode(["error" => "Auth error", "message" => "Invalid token type."]);
+                exit;
+            }
+            try {
+                $tokenService = new TokenService();
+                $tokenService->validateAccessToken($authHeader[1]);
+            }
+            catch (Exception $e) {
+                http_response_code(401);
+                echo json_encode(["error" => "Auth error", "message" => $e->getMessage()]);
+                exit;
+            }
         }
+        try {
+                $tokenService = new TokenService();
+                $tokenService->validateAccessToken($_COOKIE['jwtAccess']);
+            }
+            catch (Exception $e) {
+                http_response_code(401);
+                echo json_encode(["error" => "Auth error", "message" => $e->getMessage()]);
+                exit;
+            }
     }
 
     // -- INIZIO GESTIONE ENDPOINT PER VERIFICA CREDENZIALI -- //
@@ -118,6 +139,11 @@
                 http_response_code(200);
                 echo json_encode([
                     "message" => "Login successful.",
+                    "userdata" => [
+                        "id" => $userLoginData["id"],
+                        "username" => $userLoginData["username"],
+                        "email" => $userLoginData["email"]
+                    ],
                     "accessToken" => $accessToken,
                     "refreshToken" => $refreshToken
                 ]);
@@ -170,9 +196,21 @@
         //verify-refresh per ottener nuovo access token
         else if ($segments[1] == 'verify-refresh') {
             try {
+                if ($authHeader[1] == null) {
+                    $refreshToken = $_COOKIE['jwtRefresh'] ?? null;
+                }
+                else {
+                    $refreshToken = $authHeader[1];
+                }
                 $tokenService = new TokenService();
-                $userdata = $tokenService->validateRefreshToken($authHeader[1]);
+                $userdata = $tokenService->validateRefreshToken($refreshToken);
                 $accessToken = $tokenService->generateAccessToken($userdata->username, $userdata->id);
+                setcookie("jwtAccess", $accessToken, [
+                    "expires" => time() + 600,
+                    "path" => "/",
+                    "httponly" => true,
+                    "samesite" => "Lax"
+                ]);
                 http_response_code(200);
                 echo json_encode(["accessToken" => $accessToken, "userdata" => $userdata]);
             }
@@ -202,6 +240,19 @@
                 echo json_encode(['error' => 'Internal error: ' . $e->getMessage()]);
             }
         }
+        else if ($segments[1] == 'getUserData') {
+            $id = $segments[2];
+            try {
+                $usersEndpoints = new UsersEndpoints();
+                $userData = $usersEndpoints->getUserData($id);
+                http_response_code(200);
+                echo json_encode($userData);
+            }
+            catch (PDOException $e) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Internal error: ' . $e->getMessage()]);
+            }
+        }
         else if ($segments[1] == 'getUserSpaces') {
             authorizeRequest($headers, $authHeader);
             $id = $segments[2];
@@ -213,7 +264,7 @@
             }
             catch (PDOException $e) {
                 http_response_code(500);
-                echo json_encode(['error' => 'Internal error: ' . $e->getMessage()]);
+                echo json_encode(['error' => 'Internal error: ' . $e->getMessage() . "Test auth: "]);
             }
         }
         else if ($segments[1] == 'getUserInterests') {
@@ -316,6 +367,67 @@
                 echo json_encode(['error' => 'Internal error: ' . $e->getMessage()]);
             }
         }
+        else if ($segments[1] == 'createPost') {
+            authorizeRequest($headers, $authHeader);
+            $user_id = $_POST['user_id'] ?? null;
+            $title = $_POST['title'] ?? null;
+            $description = $_POST['description'] ?? null;
+            if (!$title) {
+                http_response_code(400);
+                echo json_encode(["error" => "Bad request", "message" => "Il titolo è obbligatorio."]);
+                exit;
+            }
+            
+            // Gestione immagini (max 5, come da frontend)
+            $imagePaths = [];
+            if (isset($_FILES['images'])) {
+                $files = $_FILES['images'];
+                $uploadDir = __DIR__ . "/../../uploads/users/{$user_id}/posts/";
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+                // Normalizza in array se è stato inviato un solo file (PHP lo tratta come singolo)
+                if (!is_array($files['name'])) {
+                    $files = [
+                        'name' => [$files['name']],
+                        'type' => [$files['type']],
+                        'tmp_name' => [$files['tmp_name']],
+                        'error' => [$files['error']],
+                        'size' => [$files['size']]
+                    ];
+                }
+                $count = count($files['name']);
+                if ($count > 5) {
+                    http_response_code(400);
+                    echo json_encode(["error" => "Too many images", "message" => "Massimo 5 immagini consentite."]);
+                    exit;
+                }
+                for ($i = 0; $i < $count; $i++) {
+                    if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                        $tmpName = $files['tmp_name'][$i];
+                        $originalName = basename($files['name'][$i]);
+                        $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+                        $newName = uniqid('post_') . '.' . $extension;
+                        $destination =  $uploadDir . $newName;
+
+                        if (move_uploaded_file($tmpName, $destination)) {
+                            $relativePath = "uploads/users/{$user_id}/posts/{$newName}";
+                            $imagePaths[] = $relativePath;
+                        }
+                    }
+                }
+            }
+
+            try {
+                $postEndpoints = new PostEndpoints();
+                $postId = $postEndpoints->createPost($user_id, $title, $description, $imagePaths);
+                http_response_code(201);
+                echo json_encode(["message" => "Post created successfully.", "postId" => $postId]);
+            }
+            catch (PDOException $e) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Internal error: ' . $e->getMessage()]);
+            }
+        }
     }
 
     if ($segments[0] == 'spaces') {
@@ -325,11 +437,10 @@
             $iconUrl = $data["iconUrl"];
             $bannerUrl = $data["bannerUrl"];
             $description = $data["description"];
-            $maxMembers = $data["maxMembers"];
 
             try {
                 $spaceEndpoints = new SpaceEndpoints();
-                $spaceEndpoints->createSpace($name, $iconUrl, $bannerUrl, $description, $maxMembers);
+                $spaceEndpoints->createSpace($name, $iconUrl, $bannerUrl, $description);
                 http_response_code(201);
                 echo json_encode(["message" => "Space created successfully."]);
             }
