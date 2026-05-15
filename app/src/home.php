@@ -118,10 +118,30 @@ if (!isset($_COOKIE['jwtRefresh'])) {
     <div class="flex items-center space-x-2">
       <span class="text-2xl font-extrabold text-electric-blue tracking-tight">The Conduit</span>
     </div>
-    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-300" id="profile-icon">
-      <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-      </svg>
+    <!-- Contenitore relativo per il dropdown -->
+    <div class="relative" id="profile-dropdown-container">
+      <button id="profile-button" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-300 hover:ring-2 hover:ring-electric-blue transition focus:outline-none">
+        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <!-- Menu a tendina -->
+      <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+        <button onclick="window.location.href='profile.php'" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center space-x-3">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <span>Vai al profilo</span>
+        </button>
+        <button onclick="window.location.href='settings.php'" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center space-x-3">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>Impostazioni</span>
+        </button>
+        <hr class="my-1 border-gray-100">
+        <button onclick="window.location.href='logout.php'" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition flex items-center space-x-3">
+          <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span>Logout</span>
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -195,6 +215,28 @@ if (!isset($_COOKIE['jwtRefresh'])) {
 
   <!-- FETCH & RENEW TOKEN -->
   <script src="js/fetch.js"></script>
+
+  <!-- GESTIONE DROPDOWN PROFILO -->
+  <script>
+    const profileBtn = document.getElementById('profile-button');
+    const profileDropdown = document.getElementById('profile-dropdown');
+
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileDropdown.classList.toggle('hidden');
+    });
+
+    // Chiudi il dropdown cliccando fuori
+    document.addEventListener('click', (e) => {
+      if (!profileDropdown.classList.contains('hidden')) {
+        // Controlla se il click è fuori dal contenitore del dropdown
+        const container = document.getElementById('profile-dropdown-container');
+        if (!container.contains(e.target)) {
+          profileDropdown.classList.add('hidden');
+        }
+      }
+    });
+  </script>
 
   <!-- Gestione tab Feed / Miei Post -->
   <script>
