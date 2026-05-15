@@ -17,6 +17,10 @@ Tecnologie: html, css, php, js
 
 ---
 
+ER Diagram: [Visualizza ER.pdf](./ER.pdf)
+
+---
+
 # 🚀 Requisiti di Sistema e Setup
 
 ## 📋 Requisiti Hardware Minimi
