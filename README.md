@@ -17,6 +17,8 @@ Tecnologie: html, css, php, js
 
 ---
 
+Diagramma dei casi d'uso: [LINK](./use-case-diagram.pdf)
+
 ER Diagram: [LINK](./ER.pdf)
 
 Manuale uente: [LINK](./MANUALE_UTENTE.md)
