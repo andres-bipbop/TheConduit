@@ -31,15 +31,6 @@ Lista utenti: [LINK](./registered_users.txt)
 
 # 🚀 Requisiti di Sistema e Setup
 
-## 📋 Requisiti Hardware Minimi
-
-| Componente | Requisito Minimo | Consigliato |
-|-----------|------------------|-----------|
-| CPU | 1 Core (2 GHz) | 2+ Cores (2.5+ GHz) |
-| RAM | 2 GB | 4+ GB |
-| Disco | 5 GB liberi | 10+ GB liberi |
-| Connessione | Adattatore di rete | 1 Gbps |
-
 ## 🔧 Requisiti Software
 
 ### Obbligatori
