@@ -137,11 +137,7 @@ docker ps
 
 ## 📧 MailHog - Email Simulator
 
-MailHog intercetta gli email SMTP durante lo sviluppo. **Non serve credenziale reale.**
-
-### Accesso Web UI
-
-**URL:** http://localhost:8025
+MailHog intercetta gli email SMTP durante lo sviluppo. **Non serve nessuna credenziale reale.**
 
 **Features:**
 - 📧 Visualizza email inviati
