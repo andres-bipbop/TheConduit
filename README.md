@@ -17,7 +17,10 @@ Tecnologie: html, css, php, js
 
 ---
 
-ER Diagram: [Visualizza ER.pdf](./ER.pdf)
+ER Diagram: [LINK](./ER.pdf)
+Manuale uente: [LINK](./MANUALE_UTENTE.md)
+Documentazione API: [LINK](./API_DOCUMENTATION.md)
+Lista utenti: [LINK](./registered_users.txt)
 
 ---
 
