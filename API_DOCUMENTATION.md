@@ -1,4 +1,4 @@
-# Documentazione API - Sistema Sociale
+# Documentazione API - The Conduit
 
 Documentazione completa dell'API RESTful per il sistema di social network, The Conduit.
 
