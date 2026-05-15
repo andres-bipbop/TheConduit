@@ -1,6 +1,4 @@
 # The Conduit
-A real-time discord-style chat application between two or more users. It also supports voice calls, video calls, community servers and other features.
-
 Cognome: Pellegrinelli
 
 Nome: Andres
@@ -13,102 +11,144 @@ Descrizione: Un'app di social media in cui puoi creare e unirti a comunità (for
 
 Target: tutti.
 
-Competitors: Reddit, Substack
+Competitors: Reddit, Substack, X
 
 Tecnologie: html, css, php, js
 
-**Link pubblico al prototipo della web app:** https://bebop-jam-sessions.lovable.app
+---
 
-Pagine disponibili: /auth, /dashboard, /community/:id, /create-community, /profile, /settings, /chat/:friendId
+# 🚀 Requisiti di Sistema e Setup
 
-# Analisi dei requisiti
+## 📋 Requisiti Hardware Minimi
 
-## 1. Utente Esterno
-**Azioni possibili:**
-- Registrazione
-- Login
+| Componente | Requisito Minimo | Consigliato |
+|-----------|------------------|-----------|
+| CPU | 1 Core (2 GHz) | 2+ Cores (2.5+ GHz) |
+| RAM | 2 GB | 4+ GB |
+| Disco | 5 GB liberi | 10+ GB liberi |
+| Connessione | Adattatore di rete | 1 Gbps |
 
-## 2. Utente Loggato
+## 🔧 Requisiti Software
 
-### 2.1 Pagina Principale
-**Azioni possibili:**
-- Creare Comunità
-- Selezionare Comunità
-- Aggiungere Comunità
-- Aggiungere Amici
-- Aprire Chat Amico
-- Visualizzare richieste di amicizia
-- Visualizzare post di altri utenti
-- Creare post
+### Obbligatori
+- **Apache 2.4+** (Web Server)
+- **MariaDB 10.3+** o **MySQL 8.0+** (Database)
+- **PHP 7.4+** (Backend)
+- **Composer** (Gestore dipendenze PHP)
+- **Node.js 14+** (Per build Tailwind CSS)
+- **npm 6+** (Gestore pacchetti Node.js)
 
-### 2.2 Gestione del Profilo
-**Azioni possibili:**
-- Modificare Nome Utente
-- Modificare Foto Profilo
-- Modificare Descrizione Profilo
-
-### 2.3 Impostazioni Personali
-**Azioni possibili:**
-- Gestisci Preferenze
-- Gestisci Impostazioni Account
-
-### 2.4 Chat con altro utente
-**Azioni possibili:**
-- Inviare messaggi
-- Avviare una chiamata vocale
-- Avviare una videochiamata
-
-### 2.5 Post
-**Azioni possibili:**
-- Mettere Like
-- Mettere commenti
-- Condividere
-
-## 3. Proprietario di una Comunità
-
-### 3.1 Gestione Membri
-**Azioni possibili:**
-- Visualizzare Membri
-- Sospendere Membro
-- Bannare Membro
-- Modificare Ruoli Membri
-
-### 3.2 Impostazioni Comunità
-**Azioni possibili:**
-- Impostare Privata/Publica
-- Definire Numero Massimo Membri
-- Modificare Nome Comunità
-- Aggiungere Immagine Comunità
-- Modificare Descrizione Comunità
-- Creare Link Invito
-
-### 3.3 Struttura Comunità
-**Azioni possibili:**
-- Creare/Modificare/Eliminare Canale Testuale
-- Creare/Modificare/Eliminare Canale Vocale
-- Creare/Modificare/Eliminare Canale Post
-
-## 4. Membro di una Comunità
-**Azioni possibili:**
-- Scrivere Messaggi
-- Partecipare Canale Vocale
-- Pubblicare Post Privato/Pubblico
-- Visualizzare Profili Amici
-- Abbandonare Comunità
-
-## 5. Membro Sospeso
-**Azioni possibili:**
-- Abbandonare Comunità
-- Inviare messaggio al propietario della comunità
+### Opzionali ma Consigliati
+- **Docker** (Per MailHog e containerizzazione)
 
 
-Diagramma UML dei casi d'uso:
-<img width="1356" height="1151" alt="casid&#39;uso drawio" src="https://github.com/user-attachments/assets/70891733-6d17-4718-99a9-a2b9036d3016" />
+## ⚙️ Configurazione
 
-Diagramma UML delle classi:
-<img width="5550" height="4321" alt="Blank diagram" src="https://github.com/user-attachments/assets/8711b162-3659-4d42-b3ad-db1260757c1e" />
+### 1. Clona il Repository
 
-Schema ER:
-<img width="5459" height="4675" alt="Blank diagram (2)" src="https://github.com/user-attachments/assets/d9496270-d921-4f82-8fe5-446cf095653a" />
+```bash
+git clone https://github.com/andres-bipbop/TheConduit.git
+cd TheConduit/progetto
+```
 
+### 2. Installa Dipendenze PHP
 
+```bash
+# Installa dipendenze per il backend API
+cd api
+composer install
+cd ..
+```
+
+### 3. Installa Dipendenze Node.js
+
+```bash
+# Installa pacchetti npm (per Tailwind CSS)
+npm install
+```
+
+### 4. Configura il Database
+
+#### Accesso a MariaDB
+
+```bash
+# Su Linux/macOS
+sudo mariadb
+
+# Su Windows
+mysql -u root
+```
+
+#### Comandi Setup Database
+
+```sql
+-- Crea database
+CREATE DATABASE my_pellegrinelliandres5ie CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Crea utente
+CREATE USER 'admin_andres'@'localhost' IDENTIFIED BY 'YOUR_SECURE_PASSWORD';
+
+-- Concedi permessi
+GRANT ALL PRIVILEGES ON my_pellegrinelliandres5ie.* TO 'admin_andres'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+## 🚀 Avviamento Servizi - Quick Start
+
+### Metodo Automatico (Consigliato)
+
+```bash
+# Rendi eseguibile e avvia lo script
+chmod +x start.sh
+./start.sh
+```
+
+### Metodo Manuale
+
+```bash
+# Avvia Apache
+sudo systemctl start apache2     # Linux
+sudo apachectl start             # macOS
+
+# Avvia MariaDB
+sudo systemctl start mariadb     # Linux
+sudo mysql.server start          # macOS
+
+# Avvia MailHog (richiede Docker)
+docker run -d -p 1025:1025 -p 8025:8025 mailhog/mailhog
+
+# Verifica stato
+sudo systemctl status apache2
+sudo systemctl status mariadb
+docker ps
+```
+
+## 🔌 Porte Utilizzate
+
+| Servizio | Porta | Descrizione |
+|----------|-------|-------------|
+| Apache (HTTP) | 80 | Web Server |
+| MariaDB | 3306 | Database |
+| MailHog SMTP | 1025 | Email simulato |
+| MailHog UI | 8025 | Interfaccia web MailHog |
+
+## 📧 MailHog - Email Simulator
+
+MailHog intercetta gli email SMTP durante lo sviluppo. **Non serve credenziale reale.**
+
+### Accesso Web UI
+
+**URL:** http://localhost:8025
+
+**Features:**
+- 📧 Visualizza email inviati
+- 🔍 Ricerca per mittente/destinatario
+- 📝 Preview HTML
+- 📎 Scarica allegati
+- 🗑️ Cancella email
+
+**Perché MailHog?**
+- ✅ Perfetto per testing email
+- ✅ Niente configurazione SMTP reale
+- ✅ Interfaccia intuitiva
+- ✅ Docker-based (facile deploy)
